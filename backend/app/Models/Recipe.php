@@ -6,5 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Recipe extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'ingredients',
+        'instructions',
+        'url',
+        'memo',
+        'cooked_count',
+    ];
 }
