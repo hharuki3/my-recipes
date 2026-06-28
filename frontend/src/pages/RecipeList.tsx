@@ -22,7 +22,7 @@ function RecipeList() {
             <button onClick={() => navigate('recipes/new')}>登録する</button>
             <ul>
                 {recipes.map(recipe => (
-                    <li key={recipe.id}>
+                    <li key={recipe.id} onClick={() => navigate(`recipes/${recipe.id}`)} style={{ cursor: 'pointer'}}>
                         {recipe.name} ({recipe.cooked_count}回)
                     </li>
                 ))}
