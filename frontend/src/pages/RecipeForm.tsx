@@ -1,8 +1,11 @@
-import {useState} from 'react'
-import { useNavigate } from "react-router-dom"
+import {useState, useEffect} from 'react'
+import { useNavigate, useParams } from "react-router-dom"
 
 
 function RecipeForm(){
+    const { id } = useParams()
+    const isEdit = !!id
+
     const navigate = useNavigate()
     const [name, setName] = useState('')
     const [ingredients, setIngredients] = useState('')
@@ -12,16 +15,33 @@ function RecipeForm(){
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        fetch('http://localhost:8000/api/recipes' , {
-            method: 'POST',
+        const method = isEdit ? 'PUT' : 'POST'
+        const endpoint = isEdit
+            ? `http://localhost:8000/api/recipes/${id}`
+            : 'http://localhost:8000/api/recipes'
+        fetch(endpoint , {
+            method: method,
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ name, ingredients, instructions, url, memo}),
-        }).then(() => navigate('/'))
+        }).then(() => navigate(isEdit ? `/recipes/${id}` : '/'))
     }
+
+    useEffect(() => {
+        if(!isEdit) return
+        fetch(`http://localhost:8000/api/recipes/${id}`)
+        .then(r => r.json())
+        .then(data => {
+            setName(data.name)
+            setIngredients(data.ingredients ?? '')
+            setInstructions(data.instructions ?? '')
+            setUrl(data.url ?? '')
+            setMemo(data.memo ?? '')
+        })
+    }, [id])
 
     return (
         <div>
-            <h1>レシピ登録</h1>
+            <h1>{isEdit ? 'レシピ編集' : 'レシピ登録'}</h1>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>料理名</label>
@@ -43,7 +63,7 @@ function RecipeForm(){
                     <label>メモ</label>
                     <textarea value={memo} onChange={e => setMemo(e.target.value)} />
                 </div>
-                <button type="submit">登録する</button>
+                <button type="submit">{isEdit ? '更新する' : '登録する'}</button>
             </form>
         </div>
     )
