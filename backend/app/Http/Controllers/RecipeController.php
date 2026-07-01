@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RecipeController extends Controller
 {
@@ -19,20 +20,41 @@ class RecipeController extends Controller
 
     public function store(Request $request)
     {
-        $recipe = Recipe::create($request->all());
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('images', 'public');
+            $data['image_path'] = $path;
+        }
+
+        $recipe = Recipe::create($data);
         return response()->json($recipe, 201);
     }
 
-        public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $recipe = Recipe::findOrFail($id);
-        $recipe->update($request->all());
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            if ($recipe->image_path) {
+                Storage::disk('public')->delete($recipe->image_path);
+            }
+            $path = $request->file('image')->store('images', 'public');
+            $data['image_path'] = $path;
+        }
+
+        $recipe->update($data);
         return response()->json($recipe);
     }
 
     public function destroy($id)
     {
-        Recipe::findOrFail($id)->delete();
+        $recipe = Recipe::findOrFail($id);
+        if ($recipe->image_path) {
+            Storage::disk('public')->delete($recipe->image_path);
+        }
+        $recipe->delete();
         return response()->json(null, 204);
     }
 
