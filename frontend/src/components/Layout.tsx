@@ -31,7 +31,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             買い物リスト
           </button>
         </nav>
-        <button className={styles.newButton} onClick={() => navigate('/recipes/new')}>
+        <button
+          className={styles.newButton}
+          onClick={() => window.dispatchEvent(new Event('open-create-modal'))}
+        >
           ＋ 新規
         </button>
       </header>
